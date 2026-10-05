@@ -1,9 +1,9 @@
 """
-Pobiera godzinowe dane pogodowe i o jakości powietrza dla Seulu z Open-Meteo
-i zapisuje je jako jeden plik CSV (UrbanAtmos).
+Fetches hourly weather and air quality data for Daegu from Open-Meteo
+and saves them as a single CSV file (UrbanAtmos).
 
-Wymagania:  pip install requests pandas
-Uruchomienie:  python fetch_seoul_open_meteo.py
+Requirements:  pip install requests pandas
+Usage:         python fetch_daegu_open_meteo.py
 """
 
 from datetime import date, timedelta
@@ -11,14 +11,14 @@ from datetime import date, timedelta
 import pandas as pd
 import requests
 
-# ---------- USTAWIENIA ----------
-#LATITUDE = 37.5665       # Seul
-#LONGITUDE = 126.9780
+# ---------- SETTINGS ----------
+# LATITUDE = 37.5665       # Seoul
+# LONGITUDE = 126.9780
 
 LATITUDE = 35.8714       # Daegu
 LONGITUDE = 128.6014
 START_DATE = "2023-01-01"
-# Archiwum pogodowe ma kilkudniowe opóźnienie, więc kończymy tydzień temu
+# The weather archive lags by a few days, so we end one week ago
 END_DATE = (date.today() - timedelta(days=7)).isoformat()
 TIMEZONE = "Asia/Seoul"
 OUTPUT_CSV = "Daegu_open_meteo_hourly.csv"
@@ -50,7 +50,7 @@ AIR_VARS = [
 
 
 def fetch_hourly(url: str, variables: list[str], start: str, end: str) -> pd.DataFrame:
-    """Pobiera dane godzinowe z jednego endpointu Open-Meteo jako DataFrame."""
+    """Fetches hourly data from a single Open-Meteo endpoint as a DataFrame."""
     params = {
         "latitude": LATITUDE,
         "longitude": LONGITUDE,
@@ -61,7 +61,7 @@ def fetch_hourly(url: str, variables: list[str], start: str, end: str) -> pd.Dat
     }
     response = requests.get(url, params=params, timeout=60)
     if response.status_code != 200:
-        raise RuntimeError(f"Błąd {response.status_code} z {url}: {response.text[:300]}")
+        raise RuntimeError(f"Error {response.status_code} from {url}: {response.text[:300]}")
     hourly = response.json()["hourly"]
     df = pd.DataFrame(hourly)
     df["time"] = pd.to_datetime(df["time"])
@@ -69,7 +69,7 @@ def fetch_hourly(url: str, variables: list[str], start: str, end: str) -> pd.Dat
 
 
 def fetch_in_year_chunks(url: str, variables: list[str]) -> pd.DataFrame:
-    """Dzieli zakres dat na roczne kawałki, żeby zapytania były lekkie."""
+    """Splits the date range into yearly chunks to keep requests light."""
     start = pd.Timestamp(START_DATE)
     end = pd.Timestamp(END_DATE)
     chunks = []
@@ -85,21 +85,21 @@ def fetch_in_year_chunks(url: str, variables: list[str]) -> pd.DataFrame:
 
 
 def main() -> None:
-    print("Pobieram dane pogodowe...")
+    print("Fetching weather data...")
     weather = fetch_in_year_chunks(WEATHER_URL, WEATHER_VARS)
 
-    print("Pobieram dane o jakości powietrza...")
+    print("Fetching air quality data...")
     air = fetch_in_year_chunks(AIR_URL, AIR_VARS)
 
     df = weather.merge(air, on="time", how="inner").sort_values("time")
 
-    print(f"\nWiersze: {len(df)}, kolumny: {len(df.columns)}")
-    print(f"Zakres: {df['time'].min()} -> {df['time'].max()}")
-    print("\nBrakujące wartości (%):")
+    print(f"\nRows: {len(df)}, columns: {len(df.columns)}")
+    print(f"Range: {df['time'].min()} -> {df['time'].max()}")
+    print("\nMissing values (%):")
     print((df.isna().mean() * 100).round(2).to_string())
 
     df.to_csv(OUTPUT_CSV, index=False)
-    print(f"\nZapisano: {OUTPUT_CSV}")
+    print(f"\nSaved: {OUTPUT_CSV}")
 
 
 if __name__ == "__main__":

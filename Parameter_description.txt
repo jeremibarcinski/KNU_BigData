@@ -1,0 +1,29 @@
+dew_point_2m - a temperature to which the air temperature should be lowered so that the water would starts to condense.
+for example the higher the dew point then more water vapor is in the air
+
+precipitation - refers to the total amount of precipitation in a given hour, measured in millimeters
+0.5: chill breeze
+2-4: raining
+<10: heavy rain
+
+shortwave_radiation - promieniowanie słoneczne 
+
+pm2_5 - concentration of fine particles smaller than 2.5 micrometers (soot, combustion dust, long-range dust). 
+It penetrates deep into the lungs and is the main smog indicator. 
+
+pm10 - covers particles up to 10 micrometers and is always greater than or equal to PM2.5. 
+High spikes are real smog episodes, so we keep them rather than treating them as errors.
+
+nitrogen_dioxide (NO₂, µg/m³): combustion gas from traffic, power plants and industry. 
+A marker of traffic pollution. Reacts in sunlight to form ozone and contributes to PM2.5.
+
+ozone (O₃, µg/m³): ground-level ozone formed from NOx and other gases in sunlight. 
+Peaks on sunny summer afternoons and drops at night and in city centers (reacts with NOx). 
+Values appear rounded (only 235 distinct values).
+
+sulphur_dioxide (SO₂, µg/m³): from burning sulfur-containing coal and oil (power plants, industry, shipping). 
+Irritates airways, causes acid rain. Usually low concentrations.
+
+carbon_monoxide (CO, µg/m³): product of incomplete combustion (vehicles, heating). 
+Values are much larger in magnitude than other pollutants, so scaling will matter in stage 3.
+
