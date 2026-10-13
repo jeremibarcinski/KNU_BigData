@@ -23,9 +23,9 @@ import pandas as pd
 
 # ---------- SETTINGS ----------
 # Change these paths once you set up data/raw and data/processed folders
-INPUT_CSV = "Daegu_open_meteo_hourly.csv"
-OUTPUT_CSV = "Daegu_clean.csv"
-REPORT_TXT = "Daegu_clean_report.txt"
+INPUT_CSV = "ERA5_01_Daegu_open_meteo_hourly.csv"
+OUTPUT_CSV = "ERA5_02_Daegu_clean.csv"
+REPORT_TXT = "ERA5_02_Daegu_clean_report.txt"
 
 OUTLIER_QUANTILE = 0.999   # threshold for the extreme-value report
 TOP_N_OUTLIERS = 5         # how many largest values to list per column

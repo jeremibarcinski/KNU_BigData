@@ -1,0 +1,158 @@
+1. LOADING
+   Rows in file: 234600, duplicate timestamps removed: 0
+   Range: 2000-01-01 00:00:00 -> 2026-10-05 23:00:00
+   Rows from a station other than 143: 0
+
+2. TIME AXIS CONTINUITY
+   Expected hours: 234600, missing whole hours: 0
+
+3. COLUMNS AND KMA MISSING-VALUE CODES (-9 / -99)
+   Kept (KMA -> ours): TA->temperature, TD->dew_point, HM->relative_humidity, PV->vapor_pressure, PA->station_pressure, PS->sea_level_pressure, WS->wind_speed, WD->wind_direction_code, CA_TOT->cloud_cover_tenths, VS->visibility_10m, SS->sunshine_hours, SI->solar_radiation_mj, TS->ground_temperature, RN->precipitation, IR->precip_flag
+   relative_humidity: 30 codes -> NaN
+   vapor_pressure: 46781 codes -> NaN
+   station_pressure: 46781 codes -> NaN
+   sea_level_pressure: 46778 codes -> NaN
+   wind_speed: 10 codes -> NaN
+   wind_direction_code: 10 codes -> NaN
+   cloud_cover_tenths: 79147 codes -> NaN
+   visibility_10m: 72125 codes -> NaN
+   temperature: -99 codes: 10; value -9.0: 24 (code -> NaN: 0, kept as real: 24, undecided and kept: 0)
+   dew_point: -99 codes: 46782; value -9.0: 356 (code -> NaN: 0, kept as real: 356, undecided and kept: 0)
+   ground_temperature: -99 codes: 0; value -9.0: 58570 (code -> NaN: 56889, kept as real: 1681, undecided and kept: 21)
+   solar_radiation_mj: night code -> 0: 105912, daytime code -> NaN: 284
+   sunshine_hours: night code -> 0: 105906, daytime code -> NaN: 272
+   precipitation: 'no rain' code -> 0: 138848, other codes -> NaN: 75353
+   precip_flag counts: -9: 13334, 1: 4716, 2: 2, 3: 195374, 4: 21173, 6: 1
+
+4. PHYSICAL RANGE CHECKS (impossible values -> NaN)
+   Total values judged impossible: 0
+
+5. MISSING DATA (NaN) AFTER CODES AND RANGE CHECKS, BEFORE FILLING
+   Share of NaN per column, whole file (%):
+       temperature: 0.0
+       dew_point: 19.9
+       relative_humidity: 0.0
+       vapor_pressure: 19.9
+       station_pressure: 19.9
+       sea_level_pressure: 19.9
+       wind_speed: 0.0
+       wind_direction_code: 0.0
+       cloud_cover_tenths: 33.7
+       visibility_10m: 30.7
+       sunshine_hours: 0.1
+       solar_radiation_mj: 0.1
+       ground_temperature: 24.2
+       precipitation: 32.1
+   Share of NaN per year (%), variables in rows, years in columns:
+       time                 2000  2001  2002  2003  2004  2005  2006  2007  2008  2009  2010  2011  2012  2013   2014  2015  2016  2017  2018  2019  2020  2021  2022  2023  2024  2025  2026
+       temperature           0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.1    0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0
+       dew_point            66.7  66.7  66.7  66.7  66.7  66.7  66.7  66.7   0.2   0.0   0.0   0.0   0.0   0.1    0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0
+       relative_humidity     0.2   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.1    0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0
+       vapor_pressure       66.7  66.7  66.7  66.7  66.7  66.7  66.7  66.7   0.2   0.0   0.0   0.0   0.0   0.1    0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0
+       station_pressure     66.7  66.7  66.7  66.7  66.7  66.7  66.7  66.7   0.2   0.0   0.0   0.0   0.0   0.1    0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0
+       sea_level_pressure   66.7  66.7  66.7  66.7  66.7  66.7  66.7  66.7   0.2   0.0   0.0   0.0   0.0   0.1    0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0
+       wind_speed            0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.1    0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0
+       wind_direction_code   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.1    0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0
+       cloud_cover_tenths   66.7  66.7  66.7  66.7  66.7  66.7  66.7  66.7  23.1  22.7  22.1  22.3  22.0  42.0  100.0  56.6  22.2  23.0  13.1   0.1   0.3   0.1   0.1   0.0   0.0   0.0   0.1
+       visibility_10m       66.7  66.7  66.7  66.7  66.7  66.7  66.7  66.7  23.1  22.7  22.0  22.3  22.0  42.0  100.0  35.3   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0
+       sunshine_hours        0.2   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.9   0.0   0.3    0.1   0.1   0.1   0.1   0.1   0.4   0.1   0.0   0.1   0.3   0.0   0.1   0.0
+       solar_radiation_mj    0.2   0.1   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.0   0.9   0.0   0.3    0.1   0.1   0.1   0.1   0.1   0.4   0.1   0.1   0.1   0.3   0.0   0.1   0.1
+       ground_temperature   80.1  80.6  81.0  81.2  82.0  79.2  81.3  82.7   0.3   0.0   0.0   0.0   0.0   0.2    0.0   0.1   0.0   0.0   0.0   0.1   0.0   0.0   0.0   0.0   0.0   0.1   0.0
+       precipitation        90.6  60.3  32.8  33.9  32.4  33.0  29.9  31.7  28.2  27.6  27.7  27.6  27.7  27.9   27.6  27.6  27.7  27.6  27.6  27.6  27.7  27.6  27.6  27.6  27.7  27.6  21.9
+   Note: precipitation has NaN by design from November to March (3-hourly data).
+
+6. SHORT GAPS (<= 3 h) FILLED BY LINEAR INTERPOLATION
+   temperature: 1 values filled
+   dew_point: 46770 values filled
+   relative_humidity: 17 values filled
+   vapor_pressure: 46769 values filled
+   station_pressure: 46768 values filled
+   sea_level_pressure: 46770 values filled
+   wind_speed: 2 values filled
+   ground_temperature: 15 values filled
+
+7. ANALYSIS WINDOW
+   Kept from 2014-01-01: 111864 of 234600 rows
+   Range: 2014-01-01 00:00:00 -> 2026-10-05 23:00:00
+
+8. EXTREME VALUES (report only, above the 99.9th percentile)
+   temperature: threshold 36.30, extreme count: 107, max 39.50
+       2026-08-03 15:00:00  39.50
+       2026-08-02 16:00:00  38.60
+       2026-08-03 14:00:00  38.50
+       2018-07-27 16:00:00  38.40
+       2026-08-03 16:00:00  38.20
+   dew_point: threshold 26.00, extreme count: 103, max 28.30
+       2022-08-03 19:00:00  28.30
+       2022-07-06 20:00:00  27.40
+       2022-08-02 12:00:00  27.20
+       2022-08-20 12:00:00  27.10
+       2022-08-06 08:00:00  27.00
+   relative_humidity: threshold 100.00, extreme count: 0, max 100.00
+   vapor_pressure: threshold 33.60, extreme count: 103, max 38.50
+       2022-08-03 19:00:00  38.50
+       2022-07-06 20:00:00  36.50
+       2022-08-02 12:00:00  36.10
+       2022-08-20 12:00:00  35.90
+       2022-08-06 08:00:00  35.60
+   station_pressure: threshold 1029.10, extreme count: 103, max 1031.60
+       2023-12-23 09:00:00  1031.60
+       2023-12-23 10:00:00  1031.60
+       2023-12-23 00:00:00  1031.50
+       2023-12-23 08:00:00  1031.30
+       2018-12-31 09:00:00  1031.20
+   sea_level_pressure: threshold 1036.20, extreme count: 109, max 1038.70
+       2023-12-23 00:00:00  1038.70
+       2023-12-23 09:00:00  1038.70
+       2023-12-23 10:00:00  1038.70
+       2023-12-23 08:00:00  1038.50
+       2023-12-23 01:00:00  1038.40
+   wind_speed: threshold 8.20, extreme count: 100, max 10.80
+       2016-05-04 16:00:00  10.80
+       2020-09-03 01:00:00  10.80
+       2016-05-04 14:00:00  10.70
+       2023-01-24 13:00:00  10.40
+       2025-03-16 20:00:00  10.40
+   cloud_cover_tenths: threshold 10.00, extreme count: 0, max 10.00
+   visibility_10m: threshold 5000.00, extreme count: 0, max 5000.00
+   sunshine_hours: threshold 1.00, extreme count: 0, max 1.00
+   solar_radiation_mj: threshold 3.58, extreme count: 100, max 4.13
+       2019-08-31 12:00:00  4.13
+       2014-05-05 13:00:00  3.79
+       2026-06-15 13:00:00  3.79
+       2021-05-02 12:00:00  3.75
+       2024-05-20 13:00:00  3.75
+   ground_temperature: threshold 58.62, extreme count: 112, max 70.30
+       2016-08-17 12:00:00  70.30
+       2016-08-17 13:00:00  68.80
+       2016-08-19 13:00:00  67.70
+       2016-08-19 12:00:00  66.70
+       2026-07-11 14:00:00  66.40
+   precipitation: threshold 14.56, extreme count: 82, max 65.50
+       2016-07-24 19:00:00  65.50
+       2015-08-07 17:00:00  63.50
+       2024-07-09 02:00:00  44.40
+       2024-08-08 03:00:00  44.20
+       2016-07-31 20:00:00  42.30
+
+   STUCK SENSOR CHECK (>= 12 identical hours, report only)
+   temperature: 0 runs, 0 rows
+   station_pressure: 0 runs, 0 rows
+
+9. RESULT
+   Rows: 111864, columns: 14
+   Remaining NaN per column:
+       temperature: 0
+       dew_point: 4
+       relative_humidity: 4
+       vapor_pressure: 4
+       station_pressure: 4
+       sea_level_pressure: 0
+       wind_speed: 0
+       wind_direction_code: 2
+       cloud_cover_tenths: 18878
+       visibility_10m: 11859
+       sunshine_hours: 122
+       solar_radiation_mj: 131
+       ground_temperature: 19
+       precipitation: 30511

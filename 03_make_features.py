@@ -26,8 +26,8 @@ import numpy as np
 import pandas as pd
 
 # ---------- SETTINGS ----------
-INPUT_CSV = "Daegu_clean.csv"
-OUTPUT_CSV = "Daegu_features.csv"
+INPUT_CSV = "ERA5_02_Daegu_clean.csv"
+OUTPUT_CSV = "ERA5_03_Daegu_features.csv"
 
 WIND_DIRECTION_COL = "wind_direction_10m"
 DAYS_IN_YEAR = 365.25  # average year length, keeps 31 Dec close to 1 Jan

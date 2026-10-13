@@ -17,11 +17,11 @@ import requests
 
 LATITUDE = 35.8714       # Daegu
 LONGITUDE = 128.6014
-START_DATE = "2023-01-01"
+START_DATE = "2020-01-01"
 # The weather archive lags by a few days, so we end one week ago
 END_DATE = (date.today() - timedelta(days=7)).isoformat()
 TIMEZONE = "Asia/Seoul"
-OUTPUT_CSV = "Daegu_open_meteo_hourly.csv"
+OUTPUT_CSV = "ERA5_01_Daegu_open_meteo_hourly.csv"
 
 WEATHER_URL = "https://archive-api.open-meteo.com/v1/archive"
 AIR_URL = "https://air-quality-api.open-meteo.com/v1/air-quality"
