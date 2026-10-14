@@ -1,0 +1,81 @@
+1. LOADING
+   Rows: 111864, columns: 12
+   Range: 2014-01-01 00:00:00 -> 2026-10-05 23:00:00
+   Missing whole hours: 0
+
+2. HOURLY FEELS-LIKE TEMPERATURE (KMA formula, Stull wet-bulb)
+   feels_like range: -12.2 .. 36.6 degC
+   feels_like - temperature: mean 0.79, max 3.45 degC
+
+3. DAILY AGGREGATES
+   Days: 4661, aggregate columns: 26 (minimum 20 valid hours per day)
+
+4. NIGHT WINDOW 18:01-09:00 (hourly values 19:00 D ... 09:00 D+1, date = D)
+   Nights with a valid minimum air temperature: 4660 of 4661
+
+5. TARGETS (computed on the full continuous series, same-day version, before the shift)
+   Tropical night: night minimum AIR temperature >= 25
+   Advisory: feels-like Tmax >= 33 for >= 2 consecutive days
+   Alarm: feels-like Tmax >= 35 for >= 2 consecutive days
+   Extended alarm: feels-like Tmax >= 35 for >= 3 consecutive days
+   Advisory + night: advisory and night minimum air temperature >= 26
+   Positive days per month, whole series (use it to choose the season):
+           tropical_night  heatwave_advisory  heatwave_alarm  heatwave_alarm_extended  heatwave_advisory_night
+       1                0                  0               0                        0                        0
+       2                0                  0               0                        0                        0
+       3                0                  0               0                        0                        0
+       4                0                  0               0                        0                        0
+       5                0                  0               0                        0                        0
+       6                9                  7               0                        0                        2
+       7              126                 96               2                        0                       50
+       8              140                130              10                        6                       49
+       9                8                  5               0                        0                        1
+       10               0                  0               0                        0                        0
+       11               0                  0               0                        0                        0
+       12               0                  0               0                        0                        0
+
+6. FEATURES
+   Lags [1, 2, 3, 7] for: feels_like_max, feels_like_min, temperature_max, relative_humidity_mean, station_pressure_mean
+   Rolling means [3, 7] (min valid days {3: 2, 7: 5}) for: feels_like_max, temperature_mean, solar_radiation_sum
+   Streak counters: hot33_streak, hot35_streak (up to and including D); tropical-night streaks and night minima from the previous night (D-1)
+   Total feature columns: 60
+
+7. SHIFT TO D+1, SEASON CUT, SPLIT
+   Note: heat-wave labels are runs of consecutive days, so the label of D+1 uses
+   information from D+2 (and D+3 for the extended alarm) - this is part of the definition.
+   Season months [5, 6, 7, 8, 9] (day D and day D+1): 1976 of 4661 days
+   Dropped days with an unknown target: 0
+
+8. RESULT
+   Rows: 1976, columns: 68
+   Range: 2014-05-01 -> 2026-09-29
+   Rows per split: train: 1368, val: 304, test: 304
+   Positive share per split (%):
+              y_tropical_night  y_heatwave_advisory  y_heatwave_alarm  y_heatwave_alarm_extended  y_heatwave_advisory_night
+       split                                                                                                               
+       train              12.6                  9.3               0.4                        0.0                        4.1
+       val                16.4                 15.1               1.0                        1.0                        5.9
+       test               19.7                 21.4               1.0                        1.0                        9.2
+   Positive days per year (of days in the season):
+             y_tropical_night  y_heatwave_advisory  y_heatwave_alarm  y_heatwave_alarm_extended  y_heatwave_advisory_night  days
+       date                                                                                                                     
+       2014                12                    4                 0                          0                          3   152
+       2015                13                   12                 0                          0                          5   152
+       2016                15                   16                 0                          0                          8   152
+       2017                23                   14                 0                          0                          5   152
+       2018                28                   26                 2                          0                         16   152
+       2019                23                   17                 0                          0                          5   152
+       2020                19                    9                 0                          0                          2   152
+       2021                 9                    6                 0                          0                          1   152
+       2022                31                   23                 4                          0                         11   152
+       2023                13                   16                 0                          0                          4   152
+       2024                37                   30                 3                          3                         14   152
+       2025                28                   37                 0                          0                         13   152
+       2026                32                   28                 3                          3                         15   152
+   NaN per feature column (only columns with NaN):
+       solar_radiation_sum: 2
+       sunshine_sum: 2
+       precipitation_sum: 1
+       solar_radiation_sum_roll3: 2
+   Note: hourly data give daily maxima/minima slightly below the official KMA values
+   (KMA uses 10-minute data), so days close to a threshold can be classified differently.
