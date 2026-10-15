@@ -6,7 +6,7 @@ We want to predict wheather a heatwave or a tropical night is gonna occure
 | type | Advisory | alarm | Major alert |
 |---|---|---|
 | heatwave | When the daily maximum perceived temperature is expected to remain at 33℃ or higher for two or more consecutive days: `Tmax >= 33℃ for days >= 2` | When the daily maximum perceived temperature is expected to remain at 35℃ or higher for two or more consecutive days: `Tmax >= 35℃ for days >= 2` | In areas where the daily maximum wind chill temperature is observed to be 35℃ or higher for three or more days:  `Tmax >= 35℃ for days >= 3` |
-| tropical night | Tropical nights are defined as days when the nighttime minimum temperature is 25℃ or higher: `T >= 25 ℃` | | | |
+| tropical night | Tropical nights are defined as days when the nighttime minimum temperature is 25℃ or higher: `T >= 25 ℃` | none | noen | 
 
 
 ## Stage 3: daily features dataset (`ASOS_03_Daegu_daily_features.csv`)
