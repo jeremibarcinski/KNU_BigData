@@ -166,3 +166,60 @@ X_test, y_test = test[X_cols], test[target]
   so days close to a threshold can be classified differently.
 - Feels-like temperature is computed by us, not downloaded from KMA.
 - 2026 ends on 29 September. The test set is small (304 days), so yearly positive counts are small and results are noisy.
+
+## Stage 4: Modeling
+
+Use only `ASOS_03_Daegu_daily_features.csv` (not ERA5). Follow the rules from Stage 3 (chronological `split`, no shuffling, test used once).
+
+### Goal
+
+Predict tomorrow (day D+1) from the data of day D:
+
+| task | target | type |
+|---|---|---|
+| tropical night | `y_tropical_night` | classification (0/1) |
+| heatwave advisory | `y_heatwave_advisory` | classification (0/1) |
+| heatwave advisory + night | `y_heatwave_advisory_night` | classification (0/1) |
+| max feels-like temperature | `y_tmax_feels` | regression (optional) |
+
+The alarm targets are not trained (almost no positive days).
+
+### Step by step
+
+1. **Load and split.** Use the loading example from Stage 3. Train on `train`, tune on `val`, keep `test` closed.
+2. **Baselines first.** Every model must beat them:
+   - persistence: tomorrow is like today (e.g. `hot33_streak > 0` for the advisory, `night_min_air_prev >= 25` for the tropical night),
+   - climatology: the share of positive days for the same day of the year in train.
+3. **Simple model.** Logistic regression in a pipeline: median imputer -> scaler -> model, with `class_weight="balanced"`. Fit the pipeline on train only.
+4. **Tree model.** `HistGradientBoosting`, XGBoost or LightGBM. They handle NaN, so no imputer is needed. Use `class_weight="balanced"` or `scale_pos_weight` for the imbalance.
+5. **Tuning.** Tune hyperparameters with expanding-window cross-validation by year inside train (for example: train 2014-2016 -> validate 2017, train 2014-2017 -> validate 2018, and so on). No random K-fold. Keep the search small, because there are only about 1368 training rows.
+6. **Check on val.** Compare all models on `val` with the same metrics.
+7. **Choose the threshold on val.** The default 0.5 is usually bad for rare events. Pick the threshold on val (for example the best F1, or a minimum recall such as 0.8) and then keep it fixed.
+8. **Final model.** After all choices are made, you may refit on train + val with the chosen hyperparameters and threshold.
+9. **Test once.** Evaluate on `test` a single time. Do not change anything after seeing the test result.
+
+### Metrics
+
+- Do not use accuracy.
+- Classification: PR-AUC, precision, recall, F1 (at the threshold chosen on val), Brier score.
+- Regression: MAE and RMSE, compared with persistence (`feels_like_max` of today).
+- Always write the positive share of the split next to the metric.
+
+### Results table (fill in)
+
+| target | model | split | positive share (%) | PR-AUC | precision | recall | F1 | Brier |
+|---|---|---|---|---|---|---|---|---|
+| `y_heatwave_advisory` | persistence | val | | | | | | |
+| `y_heatwave_advisory` | climatology | val | | | | | | |
+| `y_heatwave_advisory` | logistic regression | val | | | | | | |
+| `y_heatwave_advisory` | gradient boosting | val | | | | | | |
+| `y_heatwave_advisory` | best model | test | | | | | | |
+
+Repeat for the other targets.
+
+### After modeling
+
+- Look at feature importance (permutation importance on val, or SHAP) to see which features help most.
+- Look at the errors: which days are missed (false negatives) and which are false alarms.
+- Mention the limitations from Stage 3 in the final report (labels use D+2 / D+3, hourly vs 10-minute data, computed feels-like, small and noisy test set).
+- Do not add ERA5 features to the model until the ERA5 dataset is ready.
