@@ -8,10 +8,9 @@ I tried to group every file with a corresponding dataset that it's doing anythin
 |---|---|---|
 | python | I used A in front as well, so: A_ASOS_01_fetch... -> dowloads ASOS data, <br>A_ASOS_02_clean... -> cleans ASOS data, <br>A_ASOS_02... -> removes columns that are not helpful (to many NaN = not good), <br>A_ASOS_03_make_f... -> adds features and converts data from hourly to day driven data | 01_fetch_daegu... -> dowloads ERA5 data, <br>02_clean_open... -> cleans ERA5 data (No NaN, bcs the model took care of them), <br>03_make_features -> ads features to data, doesn't convert them into daily format |
 | outputs | A_ASOS_01... -> ASOS_01_Daegu...csv `OUR DATA`, <br>A_ASOS_02... -> ASOS_02_Daegu...csv `cleaned data` + report, <br>A_ASOS_02_after_report.py -> ASOS_022_... `removes 2 columns` (too much NaN), <br>A_ASOS_03... -> ASOS_03_Daegu_daily `featured into daily data` + report | 01_fetch_daegu... -> ERA5_01..., <br>02_clean... -> ERA5_02...csv data + Daegu_clean_report.txt, <br>03_make_fea... -> ERA5_03_Daegu...  |
-| other | "asos_raw" is the data that was used to construct ASOS_01_Daegu...csv, which is our based Dataset for ASOS | Parameter_description.txt is a file that descripse parameters in ERA5 dataset |
+| other | "asos_raw" is the data that was used to construct ASOS_01_Daegu...csv, which is our based Dataset for ASOS, relevant for any other actions | Parameter_description.txt is a file that descripse parameters in ERA5 dataset |
 
-`To Modeling DO NOT USE ERA5 dataset !!!!` It's not suited yet for modeling.
-
+`To Modeling DO NOT USE ERA5 dataset !!!!` It's not suited yet for modeling. The only file needed for modeling is ASOS_03_Daegu_daily_features.py
 
 ## Stage 0: problem to solve
 
@@ -40,6 +39,15 @@ To satisfie the conditions we downloated 2 datasets. Firstly ERA5 dataset from O
 | discrete variables |  |  |
 
 
+## Stage 2: Cleaning Data
+
+Not that much of an important step for modeling, but breafly:
+- there were really strange data in the dataset which we needed to switch, as: -9.0, -99.0
+- we converted all of the data into hourly struckturade data
+- executed interpolation for windows with missing values smaller than 3 hours:
+```math
+y = y_0 + \frac{y_1 - y_0}{x_1 - x_0} \cdot (x - x_0)
+```
 ## Stage 3: daily features dataset (`ASOS_03_Daegu_daily_features.csv`)
 
 Created by `src/03_make_features.py` from `ASOS_022_Daegu_after_report_clean.csv`.
