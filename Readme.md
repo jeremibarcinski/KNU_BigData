@@ -1,57 +1,59 @@
-## How to use the files:
+## How to use the files
 
-I tried to group every file with a corresponding dataset that it's doing anything on. So in front of every important file there is a name to the correlating dataset that it's doing operations on.
+I grouped every file with the dataset it works on. Every important file has the dataset name at the beginning (for ASOS files I also added `A_` in front).
 
-### Files corresponding to every dataset:
+### Files corresponding to every dataset
 
 | file | ASOS | ERA5 |
 |---|---|---|
-| python | I used A in front as well, so: A_ASOS_01_fetch... -> dowloads ASOS data, <br>A_ASOS_02_clean... -> cleans ASOS data, <br>A_ASOS_02... -> removes columns that are not helpful (to many NaN = not good), <br>A_ASOS_03_make_f... -> adds features and converts data from hourly to day driven data | 01_fetch_daegu... -> dowloads ERA5 data, <br>02_clean_open... -> cleans ERA5 data (No NaN, bcs the model took care of them), <br>03_make_features -> ads features to data, doesn't convert them into daily format |
-| outputs | A_ASOS_01... -> ASOS_01_Daegu...csv `OUR DATA`, <br>A_ASOS_02... -> ASOS_02_Daegu...csv `cleaned data` + report, <br>A_ASOS_02_after_report.py -> ASOS_022_... `removes 2 columns` (too much NaN), <br>A_ASOS_03... -> ASOS_03_Daegu_daily `featured into daily data` + report | 01_fetch_daegu... -> ERA5_01..., <br>02_clean... -> ERA5_02...csv data + Daegu_clean_report.txt, <br>03_make_fea... -> ERA5_03_Daegu...  |
-| other | "asos_raw" is the data that was used to construct ASOS_01_Daegu...csv, which is our based Dataset for ASOS, relevant for any other actions | Parameter_description.txt is a file that descripse parameters in ERA5 dataset |
+| python | `A_ASOS_01_fetch...` -> downloads ASOS data, <br>`A_ASOS_02_clean...` -> cleans ASOS data, <br>`A_ASOS_02_after_report...` -> removes columns that are not helpful (too many NaN = not good), <br>`A_ASOS_03_make_f...` -> adds features and converts hourly data into daily data | `01_fetch_daegu...` -> downloads ERA5 data, <br>`02_clean_open...` -> cleans ERA5 data (no NaN, because the model took care of them), <br>`03_make_features` -> adds features to the data, does not convert them into daily format |
+| outputs | `A_ASOS_01...` -> `ASOS_01_Daegu...csv` `OUR DATA`, <br>`A_ASOS_02...` -> `ASOS_02_Daegu...csv` `cleaned data` + report, <br>`A_ASOS_02_after_report.py` -> `ASOS_022_...` `removes 2 columns` (too many NaN), <br>`A_ASOS_03...` -> `ASOS_03_Daegu_daily...` `features turned into daily data` + report | `01_fetch_daegu...` -> `ERA5_01...`, <br>`02_clean...` -> `ERA5_02...csv` data + `Daegu_clean_report.txt`, <br>`03_make_fea...` -> `ERA5_03_Daegu...` |
+| other | `asos_raw` is the raw data used to build `ASOS_01_Daegu...csv`, which is our base dataset for ASOS and is used by all other steps | `Parameter_description.txt` is a file that describes the parameters in the ERA5 dataset |
 
-`To Modeling DO NOT USE ERA5 dataset !!!!` It's not suited yet for modeling. The only file needed for modeling is ASOS_03_Daegu_daily_features.py
+`FOR MODELING DO NOT USE THE ERA5 DATASET !!!!` It is not ready for modeling yet. The only file needed for modeling is `ASOS_03_Daegu_daily_features.csv`.
 
 ## Stage 0: problem to solve
 
-We want to predict wheather a heatwave or a tropical night is gonna occure
+We want to predict whether a heatwave or a tropical night is going to occur.
 
-### conditions:
-| type | Advisory | alarm | Major alert |
+### Conditions
+
+| type | Advisory | Alarm | Major alert |
 |---|---|---|---|
-| heatwave | When the daily maximum perceived temperature is expected to remain at 33℃ or higher for two or more consecutive days: `Tmax >= 33℃ for days >= 2` | When the daily maximum perceived temperature is expected to remain at 35℃ or higher for two or more consecutive days: `Tmax >= 35℃ for days >= 2` | In areas where the daily maximum wind chill temperature is observed to be 35℃ or higher for three or more days:  `Tmax >= 35℃ for days >= 3` |
-| tropical night | Tropical nights are defined as days when the nighttime minimum temperature is 25℃ or higher: `T >= 25 ℃` | none | noen | 
+| heatwave | When the daily maximum perceived temperature is expected to remain at 33℃ or higher for two or more consecutive days:<br>`Tmax >= 33℃ for days >= 2` | When the daily maximum perceived temperature is expected to remain at 35℃ or higher for two or more consecutive days:<br>`Tmax >= 35℃ for days >= 2` | In areas where the daily maximum wind chill temperature is observed to be 35℃ or higher for three or more days:<br>`Tmax >= 35℃ for days >= 3` |
+| tropical night | Tropical nights are defined as days when the nighttime minimum temperature is 25℃ or higher:<br>`Tmin >= 25℃` | none | none |
 
 ## Stage 1: Dataset
 
-To satisfie the conditions we downloated 2 datasets. Firstly ERA5 dataset from Open-Meteo, which is measured based on earth photos from space on which models measured all of the variables. We combined two datasets: Open-Meteo weather based dataset and air quality based dataset. Going further into the project we decided to switch to ASOS dataset, which is a dataset from KMA (Korea Meteorological Administration) which is the oficial measurments of the weather in South Korea.
+To satisfy the conditions we downloaded 2 datasets. First we used the ERA5 dataset from Open-Meteo, which is created by models based on satellite data. We combined two datasets: the Open-Meteo weather dataset and the Open-Meteo air quality dataset. Later in the project we decided to switch to the ASOS dataset from the KMA (Korea Meteorological Administration), which contains the official weather measurements in South Korea.
 
-### Comparison:
+### Comparison
 
 | compare | ASOS (KMA dataset) | ERA5 (Open-Meteo dataset) |
 |---|---|---|
-| data | gathered Meteorologicaly | retrieved from space photos |
+| data | measured by weather stations | retrieved from satellite-based models |
 | number of variables available | | |
-| number of variables picked |  |  |
+| number of variables picked | | |
 | how many years available | | |
-| years picked | from 2014 until now, bcs in 2013 the station's location was changed | from 2022 until now, because air polution dataset is available from 2022 |
-| continous variables |  |  |
-| discrete variables |  |  |
+| years picked | from 2014 until now, because in 2013 the station's location was changed | from 2022 until now, because the air pollution dataset is available from 2022 |
+| continuous variables | | |
+| discrete variables | | |
 
-## Stage 2: Cleaning Data
+## Stage 2: Cleaning data
 
-Not that much of an important step for modeling, but breafly:
-- there were really strange data in the dataset which we needed to switch, as: -9.0, -99.0
-- we converted all of the data into hourly struckturade data
-- executed interpolation for windows with missing values smaller than 3 hours:
+This is not a very important step for modeling, but briefly:
+- there were strange values in the dataset that we needed to replace, such as `-9.0` and `-99.0` (KMA codes for missing data)
+- we put all of the data on a full hourly time axis
+- we filled gaps shorter than 3 hours with linear interpolation:
+
 ```math
 y = y_0 + \frac{y_1 - y_0}{x_1 - x_0} \cdot (x - x_0)
 ```
 
-After report:
-- had to remove two columns bcs there were too many missing values (NaN)
-  cloud_cover_tenths: NaN in 100% of 2014, 57% of 2015, ~22% of 2016-2017, 13% of 2018
-  visibility_10m:     NaN in 100% of 2014, 35% of 2015
+After the report:
+- we had to remove two columns because they had too many missing values (NaN):
+  - `cloud_cover_tenths`: NaN in 100% of 2014, 57% of 2015, ~22% of 2016-2017, 13% of 2018
+  - `visibility_10m`: NaN in 100% of 2014, 35% of 2015
 
 ## Stage 3: daily features dataset (`ASOS_03_Daegu_daily_features.csv`)
 
@@ -72,13 +74,13 @@ A text report with counts per split and per year is saved next to it
 |---|---|---|
 | Daily features | `temperature_*`, `feels_like_*`, `relative_humidity_*`, `dew_point_*` (min / max / mean), pressures, wind, solar, sunshine, ground temperature, precipitation, `temperature_range`, `feels_like_max_hour` | 26 columns |
 | Memory features | `*_lag1/2/3/7`, `*_roll3/7`, `station_pressure_diff1/3`, `hot33_streak`, `hot35_streak`, `night_min_air_prev`, `tropical_night_streak_prev` | past only, nothing from the future |
-| Season | `doy_sin`, `doy_cos` | day of year as a circle |
+| Season | `doy_sin`, `doy_cos` | day of the year as a circle |
 | Targets | `y_tmax_feels` (regression); `y_tropical_night`, `y_heatwave_advisory`, `y_heatwave_advisory_night`, `y_heatwave_alarm`, `y_heatwave_alarm_extended` (binary 0/1) | day D+1 |
-| Not a feature | `check_tmax_air_next_day`, `split` | see rules below |
+| Not a feature | `check_tmax_air_next_day`, `split` | see the rules below |
 
 ### Target definitions
 
-- **Feels-like temperature**: KMA summer formula (effective 2022-06-02) with Stull's wet-bulb temperature,
+- **Feels-like temperature**: KMA summer formula (effective from 2022-06-02) with Stull's wet-bulb temperature,
   computed hourly from air temperature and relative humidity, then aggregated to days.
 - **Tropical night** (`y_tropical_night`): night minimum **air** temperature (18:01-09:00) >= 25 degC.
 - **Heat wave advisory** (`y_heatwave_advisory`): daily max feels-like >= 33 degC for 2 or more consecutive days.
