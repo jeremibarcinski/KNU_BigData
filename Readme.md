@@ -1,3 +1,18 @@
+## How to use the files:
+
+I tried to group every file with a corresponding dataset that it's doing anything on. So in front of every important file there is a name to the correlating dataset that it's doing operations on.
+
+### Files corresponding to every dataset:
+
+| file | ASOS | ERA5 |
+|---|---|---|
+| python | I used A in front as well, so: A_ASOS_01_fetch... -> dowloads ASOS data, <br>A_ASOS_02_clean... -> cleans ASOS data, <br>A_ASOS_02... -> removes columns that are not helpful (to many NaN = not good), <br>A_ASOS_03_make_f... -> adds features and converts data from hourly to day driven data | 01_fetch_daegu... -> dowloads ERA5 data, <br>02_clean_open... -> cleans ERA5 data (No NaN, bcs the model took care of them), <br>03_make_features -> ads features to data, doesn't convert them into daily format |
+| outputs | A_ASOS_01... -> ASOS_01_Daegu...csv `OUR DATA`, <br>A_ASOS_02... -> ASOS_02_Daegu...csv `cleaned data` + report, <br>A_ASOS_02_after_report.py -> ASOS_022_... `removes 2 columns` (too much NaN), <br>A_ASOS_03... -> ASOS_03_Daegu_daily `featured into daily data` + report | 01_fetch_daegu... -> ERA5_01..., <br>02_clean... -> ERA5_02...csv data + Daegu_clean_report.txt, <br>03_make_fea... -> ERA5_03_Daegu...  |
+| other | "asos_raw" is the data that was used to construct ASOS_01_Daegu...csv, which is our based Dataset for ASOS | Parameter_description.txt is a file that descripse parameters in ERA5 dataset |
+
+`To Modeling DO NOT USE ERA5 dataset !!!!` It's not suited yet for modeling.
+
+
 ## Stage 0: problem to solve
 
 We want to predict wheather a heatwave or a tropical night is gonna occure
