@@ -38,7 +38,6 @@ To satisfie the conditions we downloated 2 datasets. Firstly ERA5 dataset from O
 | continous variables |  |  |
 | discrete variables |  |  |
 
-
 ## Stage 2: Cleaning Data
 
 Not that much of an important step for modeling, but breafly:
@@ -48,6 +47,12 @@ Not that much of an important step for modeling, but breafly:
 ```math
 y = y_0 + \frac{y_1 - y_0}{x_1 - x_0} \cdot (x - x_0)
 ```
+
+After report:
+- had to remove two columns bcs there were too many missing values (NaN)
+  cloud_cover_tenths: NaN in 100% of 2014, 57% of 2015, ~22% of 2016-2017, 13% of 2018
+  visibility_10m:     NaN in 100% of 2014, 35% of 2015
+
 ## Stage 3: daily features dataset (`ASOS_03_Daegu_daily_features.csv`)
 
 Created by `src/03_make_features.py` from `ASOS_022_Daegu_after_report_clean.csv`.
