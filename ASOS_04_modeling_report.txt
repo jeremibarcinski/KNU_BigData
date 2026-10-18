@@ -1,0 +1,120 @@
+1. DATA
+   ASOS_03_Daegu_daily_features.csv: 1976 rows, 60 features
+   Rows per split: train: 1368, val: 304, test: 304
+   Test evaluation: ON (final run)
+
+2-7. BASELINES, MODELS, TUNING (expanding window by year), THRESHOLD ON VAL (recall >= 0.8)
+
+=== y_tropical_night ===
+   Positive share: train 12.6%, val 16.4%, test 19.7%
+   logistic regression: best params {'class_weight': None, 'C': 0.1}, CV PR-AUC 0.684, val PR-AUC 0.742, threshold 0.321
+   hist gradient boosting: best params {'class_weight': None, 'learning_rate': 0.03, 'max_depth': 3, 'min_samples_leaf': 50}, CV PR-AUC 0.654, val PR-AUC 0.540, threshold 0.308
+   lightgbm: best params {'class_weight': None, 'learning_rate': 0.03, 'num_leaves': 15, 'min_child_samples': 20}, CV PR-AUC 0.653, val PR-AUC 0.579, threshold 0.156
+   xgboost: best params {'class_weight': None, 'learning_rate': 0.03, 'max_depth': 4, 'min_child_weight': 5}, CV PR-AUC 0.673, val PR-AUC 0.545, threshold 0.238
+   Best on val: logistic regression
+   Permutation importance on val (drop in PR-AUC), top 10:
+       tropical_night_streak_prev       +0.067 (+- 0.022)
+       doy_cos                          +0.061 (+- 0.034)
+       ground_temperature_mean          +0.057 (+- 0.019)
+       hot33_streak                     +0.045 (+- 0.014)
+       temperature_mean                 +0.038 (+- 0.013)
+       feels_like_mean                  +0.037 (+- 0.013)
+       dew_point_min                    +0.037 (+- 0.016)
+       relative_humidity_min            +0.031 (+- 0.017)
+       vapor_pressure_mean              +0.028 (+- 0.016)
+       feels_like_max                   +0.024 (+- 0.013)
+   Errors on val: 10 missed days (FN), 37 false alarms (FP)
+       FN per month: {7: 4, 8: 4, 9: 2}
+       FP per month: {7: 18, 8: 13, 9: 6}
+
+=== y_heatwave_advisory ===
+   Positive share: train 9.3%, val 15.1%, test 21.4%
+   logistic regression: best params {'class_weight': None, 'C': 1.0}, CV PR-AUC 0.765, val PR-AUC 0.893, threshold 0.382
+   hist gradient boosting: best params {'class_weight': None, 'learning_rate': 0.03, 'max_depth': None, 'min_samples_leaf': 20}, CV PR-AUC 0.772, val PR-AUC 0.906, threshold 0.302
+   lightgbm: best params {'class_weight': None, 'learning_rate': 0.03, 'num_leaves': 15, 'min_child_samples': 50}, CV PR-AUC 0.819, val PR-AUC 0.912, threshold 0.295
+   xgboost: best params {'class_weight': 'balanced', 'learning_rate': 0.03, 'max_depth': 4, 'min_child_weight': 1}, CV PR-AUC 0.801, val PR-AUC 0.887, threshold 0.493
+   Best on val: lightgbm
+   Permutation importance on val (drop in PR-AUC), top 10:
+       feels_like_mean                  +0.069 (+- 0.032)
+       doy_cos                          +0.030 (+- 0.013)
+       feels_like_max                   +0.023 (+- 0.009)
+       sea_level_pressure_mean          +0.009 (+- 0.005)
+       dew_point_min                    +0.009 (+- 0.004)
+       ground_temperature_mean          +0.008 (+- 0.003)
+       relative_humidity_mean_lag7      +0.006 (+- 0.003)
+       station_pressure_mean_lag3       +0.005 (+- 0.004)
+       feels_like_min_lag3              +0.005 (+- 0.003)
+       feels_like_max_hour              +0.005 (+- 0.007)
+   Errors on val: 9 missed days (FN), 6 false alarms (FP)
+       FN per month: {7: 2, 8: 4, 9: 3}
+       FP per month: {7: 2, 8: 4}
+
+=== y_heatwave_advisory_night ===
+   Positive share: train 4.1%, val 5.9%, test 9.2%
+   logistic regression: best params {'class_weight': None, 'C': 1.0}, CV PR-AUC 0.498, val PR-AUC 0.472, threshold 0.215
+   hist gradient boosting: best params {'class_weight': 'balanced', 'learning_rate': 0.03, 'max_depth': 3, 'min_samples_leaf': 50}, CV PR-AUC 0.561, val PR-AUC 0.445, threshold 0.222
+   lightgbm: best params {'class_weight': None, 'learning_rate': 0.03, 'num_leaves': 15, 'min_child_samples': 50}, CV PR-AUC 0.534, val PR-AUC 0.407, threshold 0.047
+   xgboost: best params {'class_weight': None, 'learning_rate': 0.03, 'max_depth': 2, 'min_child_weight': 5}, CV PR-AUC 0.568, val PR-AUC 0.518, threshold 0.126
+   Best on val: xgboost
+   Permutation importance on val (drop in PR-AUC), top 10:
+       feels_like_mean                  +0.078 (+- 0.082)
+       dew_point_min                    +0.067 (+- 0.026)
+       ground_temperature_max           +0.054 (+- 0.046)
+       temperature_min                  +0.050 (+- 0.017)
+       wind_u                           +0.044 (+- 0.014)
+       temperature_mean                 +0.043 (+- 0.029)
+       feels_like_max                   +0.037 (+- 0.039)
+       feels_like_min_lag3              +0.027 (+- 0.014)
+       solar_radiation_sum_roll7        +0.027 (+- 0.022)
+       doy_cos                          +0.023 (+- 0.019)
+   Errors on val: 3 missed days (FN), 22 false alarms (FP)
+       FN per month: {7: 1, 8: 2}
+       FP per month: {7: 8, 8: 12, 9: 2}
+
+=== y_tmax_feels (regression) ===
+   val   persistence            MAE 1.63  RMSE 2.16
+   val   ridge                  MAE 1.46  RMSE 1.87
+   val   gradient boosting      MAE 1.43  RMSE 1.80
+   test  persistence            MAE 1.64  RMSE 2.21
+   test  ridge                  MAE 1.46  RMSE 1.91
+   test  gradient boosting      MAE 1.44  RMSE 1.92
+
+RESULTS
+                      target                            model split positive_share_% PR_AUC precision recall     F1  Brier threshold    MAE   RMSE
+            y_tropical_night                      persistence   val             16.4  0.447      0.62   0.62   0.62  0.125       0.5              
+            y_tropical_night                      climatology   val             16.4  0.542     0.377    0.8  0.513  0.105     0.126              
+            y_tropical_night              logistic regression   val             16.4  0.742     0.519    0.8   0.63   0.08     0.321              
+            y_tropical_night           hist gradient boosting   val             16.4   0.54      0.46    0.8  0.584  0.103     0.308              
+            y_tropical_night                         lightgbm   val             16.4  0.579     0.435    0.8  0.563  0.103     0.156              
+            y_tropical_night                          xgboost   val             16.4  0.545      0.44    0.8  0.567  0.105     0.238              
+            y_tropical_night best model (logistic regression)  test             19.7  0.706     0.567   0.85   0.68  0.089     0.321              
+            y_tropical_night                      persistence  test             19.7  0.439       0.6    0.6    0.6  0.158       0.5              
+            y_tropical_night                      climatology  test             19.7  0.502     0.456  0.867  0.598  0.131     0.126              
+         y_heatwave_advisory                      persistence   val             15.1  0.642     0.745  0.826  0.784  0.069       0.5              
+         y_heatwave_advisory                      climatology   val             15.1   0.71     0.356  0.804  0.493   0.09     0.074              
+         y_heatwave_advisory              logistic regression   val             15.1  0.893     0.804  0.804  0.804  0.044     0.382              
+         y_heatwave_advisory           hist gradient boosting   val             15.1  0.906     0.841  0.804  0.822  0.044     0.302              
+         y_heatwave_advisory                         lightgbm   val             15.1  0.912      0.86  0.804  0.831  0.044     0.295              
+         y_heatwave_advisory                          xgboost   val             15.1  0.887     0.804  0.804  0.804  0.047     0.493              
+         y_heatwave_advisory            best model (lightgbm)  test             21.4  0.796      0.74  0.831  0.783  0.073     0.295              
+         y_heatwave_advisory                      persistence  test             21.4  0.686     0.783  0.831  0.806  0.086       0.5              
+         y_heatwave_advisory                      climatology  test             21.4  0.629     0.519  0.862  0.647  0.136     0.074              
+   y_heatwave_advisory_night                      persistence   val              5.9   0.23     0.444  0.444  0.444  0.066       0.5              
+   y_heatwave_advisory_night                      climatology   val              5.9  0.406     0.417  0.833  0.556  0.044     0.163              
+   y_heatwave_advisory_night              logistic regression   val              5.9  0.472     0.484  0.833  0.612   0.04     0.215              
+   y_heatwave_advisory_night           hist gradient boosting   val              5.9  0.445     0.326  0.833  0.469   0.06     0.222              
+   y_heatwave_advisory_night                         lightgbm   val              5.9  0.407     0.385  0.833  0.526  0.048     0.047              
+   y_heatwave_advisory_night                          xgboost   val              5.9  0.518     0.405  0.833  0.545  0.041     0.126              
+   y_heatwave_advisory_night             best model (xgboost)  test              9.2  0.579     0.411  0.821  0.548  0.056     0.126              
+   y_heatwave_advisory_night                      persistence  test              9.2  0.222     0.423  0.393  0.407  0.105       0.5              
+   y_heatwave_advisory_night                      climatology  test              9.2  0.334     0.368    0.5  0.424  0.075     0.163              
+                y_tmax_feels                      persistence   val                                                                   1.633  2.158
+                y_tmax_feels                            ridge   val                                                                   1.463  1.866
+                y_tmax_feels                gradient boosting   val                                                                   1.432  1.799
+                y_tmax_feels                      persistence  test                                                                   1.638   2.21
+                y_tmax_feels                            ridge  test                                                                   1.457  1.911
+                y_tmax_feels                gradient boosting  test                                                                   1.444  1.915
+
+Notes: thresholds are chosen on val and kept fixed; persistence is a 0/1 rule (threshold 0.5).
+Limitations: heat wave labels use D+2 (run definition); hourly data underestimate KMA extremes;
+feels-like is computed, not downloaded; test set is small (304 days) and results are noisy.

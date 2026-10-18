@@ -1,0 +1,34 @@
+target,model,split,positive_share_%,PR_AUC,precision,recall,F1,Brier,threshold,MAE,RMSE
+y_tropical_night,persistence,val,16.4,0.447,0.62,0.62,0.62,0.125,0.5,,
+y_tropical_night,climatology,val,16.4,0.542,0.377,0.8,0.513,0.105,0.126,,
+y_tropical_night,logistic regression,val,16.4,0.742,0.519,0.8,0.63,0.08,0.321,,
+y_tropical_night,hist gradient boosting,val,16.4,0.54,0.46,0.8,0.584,0.103,0.308,,
+y_tropical_night,lightgbm,val,16.4,0.579,0.435,0.8,0.563,0.103,0.156,,
+y_tropical_night,xgboost,val,16.4,0.545,0.44,0.8,0.567,0.105,0.238,,
+y_tropical_night,best model (logistic regression),test,19.7,0.706,0.567,0.85,0.68,0.089,0.321,,
+y_tropical_night,persistence,test,19.7,0.439,0.6,0.6,0.6,0.158,0.5,,
+y_tropical_night,climatology,test,19.7,0.502,0.456,0.867,0.598,0.131,0.126,,
+y_heatwave_advisory,persistence,val,15.1,0.642,0.745,0.826,0.784,0.069,0.5,,
+y_heatwave_advisory,climatology,val,15.1,0.71,0.356,0.804,0.493,0.09,0.074,,
+y_heatwave_advisory,logistic regression,val,15.1,0.893,0.804,0.804,0.804,0.044,0.382,,
+y_heatwave_advisory,hist gradient boosting,val,15.1,0.906,0.841,0.804,0.822,0.044,0.302,,
+y_heatwave_advisory,lightgbm,val,15.1,0.912,0.86,0.804,0.831,0.044,0.295,,
+y_heatwave_advisory,xgboost,val,15.1,0.887,0.804,0.804,0.804,0.047,0.493,,
+y_heatwave_advisory,best model (lightgbm),test,21.4,0.796,0.74,0.831,0.783,0.073,0.295,,
+y_heatwave_advisory,persistence,test,21.4,0.686,0.783,0.831,0.806,0.086,0.5,,
+y_heatwave_advisory,climatology,test,21.4,0.629,0.519,0.862,0.647,0.136,0.074,,
+y_heatwave_advisory_night,persistence,val,5.9,0.23,0.444,0.444,0.444,0.066,0.5,,
+y_heatwave_advisory_night,climatology,val,5.9,0.406,0.417,0.833,0.556,0.044,0.163,,
+y_heatwave_advisory_night,logistic regression,val,5.9,0.472,0.484,0.833,0.612,0.04,0.215,,
+y_heatwave_advisory_night,hist gradient boosting,val,5.9,0.445,0.326,0.833,0.469,0.06,0.222,,
+y_heatwave_advisory_night,lightgbm,val,5.9,0.407,0.385,0.833,0.526,0.048,0.047,,
+y_heatwave_advisory_night,xgboost,val,5.9,0.518,0.405,0.833,0.545,0.041,0.126,,
+y_heatwave_advisory_night,best model (xgboost),test,9.2,0.579,0.411,0.821,0.548,0.056,0.126,,
+y_heatwave_advisory_night,persistence,test,9.2,0.222,0.423,0.393,0.407,0.105,0.5,,
+y_heatwave_advisory_night,climatology,test,9.2,0.334,0.368,0.5,0.424,0.075,0.163,,
+y_tmax_feels,persistence,val,,,,,,,,1.633,2.158
+y_tmax_feels,ridge,val,,,,,,,,1.463,1.866
+y_tmax_feels,gradient boosting,val,,,,,,,,1.432,1.799
+y_tmax_feels,persistence,test,,,,,,,,1.638,2.21
+y_tmax_feels,ridge,test,,,,,,,,1.457,1.911
+y_tmax_feels,gradient boosting,test,,,,,,,,1.444,1.915

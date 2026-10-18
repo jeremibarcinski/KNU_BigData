@@ -20,7 +20,7 @@ We want to predict whether a heatwave or a tropical night is going to occur.
 
 | type | Advisory | Alarm | Major alert |
 |---|---|---|---|
-| heatwave | When the daily maximum perceived temperature is expected to remain at 33℃ or higher for two or more consecutive days:<br>`Tmax >= 33℃ for days >= 2` | When the daily maximum perceived temperature is expected to remain at 35℃ or higher for two or more consecutive days:<br>`Tmax >= 35℃ for days >= 2` | In areas where the daily maximum wind chill temperature is observed to be 35℃ or higher for three or more days:<br>`Tmax >= 35℃ for days >= 3` |
+| heatwave | When the daily maximum perceived temperature is expected to remain at 33℃ or higher for two or more consecutive days:<br>`Tmax >= 33℃ for days >= 2` | When the daily maximum perceived temperature is expected to remain at 35℃ or higher for two or more consecutive days:<br>`Tmax >= 35℃ for days >= 2` | In areas where the daily maximum perceived temperature is observed to be 35℃ or higher for three or more days:<br>`Tmax >= 35℃ for days >= 3` |
 | tropical night | Tropical nights are defined as days when the nighttime minimum temperature is 25℃ or higher:<br>`Tmin >= 25℃` | none | none |
 
 ## Stage 1: Dataset
@@ -32,12 +32,12 @@ To satisfy the conditions we downloaded 2 datasets. First we used the ERA5 datas
 | compare | ASOS (KMA dataset) | ERA5 (Open-Meteo dataset) |
 |---|---|---|
 | data | measured by weather stations | retrieved from satellite-based models |
-| number of variables available | | |
-| number of variables picked | | |
-| how many years available | | |
-| years picked | from 2014 until now, because in 2013 the station's location was changed | from 2022 until now, because the air pollution dataset is available from 2022 |
-| continuous variables | | |
-| discrete variables | | |
+| number of variables available | 46 fields per hourly row in the KMA API (44 without time and station number) | many more than we used (the Open-Meteo weather archive and air-quality APIs offer dozens of hourly variables); not counted |
+| number of variables picked | 15 read in cleaning (precipitation flag `IR` used only to clean precipitation) -> 14 in `ASOS_02` -> **12** in `ASOS_022` after removing `cloud_cover_tenths` and `visibility_10m` | **16**: 10 weather (`temperature_2m`, `apparent_temperature`, `relative_humidity_2m`, `dew_point_2m`, `surface_pressure`, `precipitation`, `wind_speed_10m`, `wind_direction_10m`, `cloud_cover`, `shortwave_radiation`) + 6 air quality (`pm2_5`, `pm10`, `nitrogen_dioxide`, `ozone`, `sulphur_dioxide`, `carbon_monoxide`) |
+| how many years available | downloaded 2000-01-01 -> 2026-10-05 (27 years) | weather downloaded 2020-01-01 -> 2026-10-05; air quality only from 2022-08-04 |
+| years picked | from 2014 until now, because in 2013 the station's location was changed | from 2023 until now (cleaned file: 2023-01-01 -> 2026-09-26), because the air pollution data start in August 2022, so 2023 is the first full year |
+| continuous variables | 11: temperature, dew point, relative humidity, vapor pressure, station pressure, sea-level pressure, wind speed, sunshine, solar radiation, ground temperature, precipitation | all 16 (wind direction is in degrees 0-360, a circular continuous variable) |
+| discrete variables | 1: `wind_direction_code` (16 compass directions + calm, stored as a code; turned into wind u / v components in stage 3) | none |
 
 ## Stage 2: Cleaning data
 
@@ -57,7 +57,7 @@ After the report:
 
 ## Stage 3: daily features dataset (`ASOS_03_Daegu_daily_features.csv`)
 
-Created by `src/03_make_features.py` from `ASOS_022_Daegu_after_report_clean.csv`.
+Created by `A_ASOS_03_make_features.py` from `ASOS_022_Daegu_after_report_clean.csv`.
 A text report with counts per split and per year is saved next to it
 (`ASOS_03_Daegu_daily_features_report.txt`).
 
@@ -109,7 +109,7 @@ A text report with counts per split and per year is saved next to it
 ### Minimal loading example and train / val / test split
 
 The split is chronological and stored in the `split` column (it is decided by the date D of the row,
-and the cut points are the settings `TRAIN_END` and `VAL_END` in `03_make_features.py`).
+and the cut points are the settings `TRAIN_END` and `VAL_END` in `A_ASOS_03_make_features.py`).
 
 | split | years (date D) | rows | role |
 |---|---|---|---|
@@ -150,7 +150,8 @@ X_test, y_test = test[X_cols], test[target]
 ### Modelling advice
 
 - **Class imbalance**: positives are rare (about 4-20% depending on target and split).
-  Use `class_weight="balanced"` or `scale_pos_weight`.
+  Handle it with the decision threshold chosen on val; `class_weight="balanced"` / `scale_pos_weight`
+  can be tried as a tuning option (in stage 4 it did not help and made the probabilities worse).
 - **Metrics**: do not use accuracy. Use PR-AUC, recall and precision (or F1) at a threshold chosen on val,
   and the Brier score for probabilities. Report the positive share per split next to every result.
 - **Baselines to beat**: persistence (tomorrow equals today, e.g. `hot33_streak > 0`) and climatology (by day of year).
@@ -190,8 +191,8 @@ The alarm targets are not trained (almost no positive days).
 2. **Baselines first.** Every model must beat them:
    - persistence: tomorrow is like today (e.g. `hot33_streak > 0` for the advisory, `night_min_air_prev >= 25` for the tropical night),
    - climatology: the share of positive days for the same day of the year in train.
-3. **Simple model.** Logistic regression in a pipeline: median imputer -> scaler -> model, with `class_weight="balanced"`. Fit the pipeline on train only.
-4. **Tree model.** `HistGradientBoosting`, XGBoost or LightGBM. They handle NaN, so no imputer is needed. Use `class_weight="balanced"` or `scale_pos_weight` for the imbalance.
+3. **Simple model.** Logistic regression in a pipeline: median imputer -> scaler -> model (class weighting none / balanced is tuned). Fit the pipeline on train only.
+4. **Tree model.** `HistGradientBoosting`, XGBoost or LightGBM. They handle NaN, so no imputer is needed. Class weighting (`class_weight` / `scale_pos_weight`) is tuned as an option.
 5. **Tuning.** Tune hyperparameters with expanding-window cross-validation by year inside train (for example: train 2014-2016 -> validate 2017, train 2014-2017 -> validate 2018, and so on). No random K-fold. Keep the search small, because there are only about 1368 training rows.
 6. **Check on val.** Compare all models on `val` with the same metrics.
 7. **Choose the threshold on val.** The default 0.5 is usually bad for rare events. Pick the threshold on val (for example the best F1, or a minimum recall such as 0.8) and then keep it fixed.
@@ -205,21 +206,92 @@ The alarm targets are not trained (almost no positive days).
 - Regression: MAE and RMSE, compared with persistence (`feels_like_max` of today).
 - Always write the positive share of the split next to the metric.
 
-### Results table (fill in)
+### How to run
+
+```bash
+pip install pandas numpy scikit-learn matplotlib lightgbm xgboost
+brew install libomp          # macOS only, needed by lightgbm and xgboost
+python A_ASOS_04_modeling.py
+```
+
+Outputs: `ASOS_04_model_results.csv` (all metrics), `ASOS_04_modeling_report.txt` (tuning, thresholds,
+feature importance, errors) and `ASOS_04_pr_curves_val.png` (precision-recall curves on val).
+The setting `EVALUATE_TEST` was `False` while all choices were made on val; the final run used `True` once.
+Do not change the script and re-run the test.
+
+### Choices made on val
+
+- **Models compared**: logistic regression, `HistGradientBoosting`, LightGBM, XGBoost, each tuned with
+  expanding-window CV by year inside train (PR-AUC).
+- **Class weighting is a tuned option** (none / balanced), not always on. Balanced weights did not improve
+  the ranking (PR-AUC) and made the probabilities too high (logistic regression Brier on val 0.164 -> 0.080
+  without weights). The imbalance is handled by the threshold instead.
+- **Threshold**: the highest threshold with **recall >= 0.8 on val**. For a heat warning a missed hot day
+  is worse than a false alarm. Persistence is a fixed 0/1 rule.
+- **Best model per target** (highest PR-AUC on val, also best in CV): tropical night -> logistic regression,
+  advisory -> LightGBM, advisory + night -> XGBoost. Refitted on train + val before the test.
+
+### Results
+
+Test = 2025-2026, evaluated once. Precision, recall and F1 use the threshold chosen on val.
 
 | target | model | split | positive share (%) | PR-AUC | precision | recall | F1 | Brier |
 |---|---|---|---|---|---|---|---|---|
-| `y_heatwave_advisory` | persistence | val | | | | | | |
-| `y_heatwave_advisory` | climatology | val | | | | | | |
-| `y_heatwave_advisory` | logistic regression | val | | | | | | |
-| `y_heatwave_advisory` | gradient boosting | val | | | | | | |
-| `y_heatwave_advisory` | best model | test | | | | | | |
+| `y_tropical_night` | persistence | val | 16.4 | 0.447 | 0.620 | 0.620 | 0.620 | 0.125 |
+| `y_tropical_night` | climatology | val | 16.4 | 0.542 | 0.377 | 0.800 | 0.513 | 0.105 |
+| `y_tropical_night` | logistic regression | val | 16.4 | 0.742 | 0.519 | 0.800 | 0.630 | 0.080 |
+| `y_tropical_night` | LightGBM | val | 16.4 | 0.579 | 0.435 | 0.800 | 0.563 | 0.103 |
+| `y_tropical_night` | persistence | test | 19.7 | 0.439 | 0.600 | 0.600 | 0.600 | 0.158 |
+| `y_tropical_night` | climatology | test | 19.7 | 0.502 | 0.456 | 0.867 | 0.598 | 0.131 |
+| `y_tropical_night` | **best: logistic regression** | test | 19.7 | **0.706** | 0.567 | 0.850 | **0.680** | **0.089** |
+| `y_heatwave_advisory` | persistence | val | 15.1 | 0.642 | 0.745 | 0.826 | 0.784 | 0.069 |
+| `y_heatwave_advisory` | climatology | val | 15.1 | 0.710 | 0.356 | 0.804 | 0.493 | 0.090 |
+| `y_heatwave_advisory` | logistic regression | val | 15.1 | 0.893 | 0.804 | 0.804 | 0.804 | 0.044 |
+| `y_heatwave_advisory` | LightGBM | val | 15.1 | 0.912 | 0.860 | 0.804 | 0.831 | 0.044 |
+| `y_heatwave_advisory` | persistence | test | 21.4 | 0.686 | 0.783 | 0.831 | 0.806 | 0.086 |
+| `y_heatwave_advisory` | climatology | test | 21.4 | 0.629 | 0.519 | 0.862 | 0.647 | 0.136 |
+| `y_heatwave_advisory` | **best: LightGBM** | test | 21.4 | **0.796** | 0.740 | 0.831 | 0.783 | **0.073** |
+| `y_heatwave_advisory_night` | persistence | val | 5.9 | 0.230 | 0.444 | 0.444 | 0.444 | 0.066 |
+| `y_heatwave_advisory_night` | climatology | val | 5.9 | 0.406 | 0.417 | 0.833 | 0.556 | 0.044 |
+| `y_heatwave_advisory_night` | XGBoost | val | 5.9 | 0.518 | 0.405 | 0.833 | 0.545 | 0.041 |
+| `y_heatwave_advisory_night` | persistence | test | 9.2 | 0.222 | 0.423 | 0.393 | 0.407 | 0.105 |
+| `y_heatwave_advisory_night` | climatology | test | 9.2 | 0.334 | 0.368 | 0.500 | 0.424 | 0.075 |
+| `y_heatwave_advisory_night` | **best: XGBoost** | test | 9.2 | **0.579** | 0.411 | 0.821 | **0.548** | **0.056** |
 
-Repeat for the other targets.
+All other val rows (all four models per target) are in `ASOS_04_model_results.csv`.
+
+Regression `y_tmax_feels` (degC):
+
+| model | val MAE | val RMSE | test MAE | test RMSE |
+|---|---|---|---|---|
+| persistence (today's `feels_like_max`) | 1.63 | 2.16 | 1.64 | 2.21 |
+| ridge | 1.46 | 1.87 | 1.46 | 1.91 |
+| gradient boosting | 1.43 | 1.80 | 1.44 | 1.92 |
+
+### Reading the results
+
+- **Tropical night**: the model clearly beats both baselines on test (PR-AUC 0.71 vs 0.50, F1 0.68 vs 0.60)
+  and keeps recall >= 0.8.
+- **Heatwave advisory**: the model ranks days better than persistence (PR-AUC 0.80 vs 0.69) and gives better
+  probabilities (Brier 0.073 vs 0.086), but at the fixed threshold its F1 (0.78) is slightly **below**
+  persistence (0.81): same recall, more false alarms. "Today is hot -> tomorrow is hot" is a very strong rule
+  for this target. The test score is also lower than on val (0.91), so some of the val result was optimistic.
+- **Advisory + night**: the hardest target (few positive days). The model is much better than the baselines
+  (PR-AUC 0.58 vs 0.33, recall 0.82 vs 0.39-0.50), but precision is about 0.4: more than half of the warnings
+  are false alarms.
+- **Regression**: the models are about 0.2 degC MAE better than persistence on both val and test.
+- The positive share grows from val to test (more hot days in 2025-2026), so compare models only within a split.
 
 ### After modeling
 
 - Look at feature importance (permutation importance on val, or SHAP) to see which features help most.
 - Look at the errors: which days are missed (false negatives) and which are false alarms.
-- Mention the limitations from Stage 3 in the final report (labels use D+2 / D+3, hourly vs 10-minute data, computed feels-like, small and noisy test set).
+- Mention the limitations from Stage 3 in the final report (labels use D+2 / D+3, hourly vs 10-minute data, computed feels-like, small and noisy test set). Done: see section 7 of `FINAL_REPORT.md`.
 - Do not add ERA5 features to the model until the ERA5 dataset is ready.
+
+## Stage 5: Final report
+
+The final report is [`FINAL_REPORT.md`](FINAL_REPORT.md) (authors: Jeremi Wojciech Barciński, Tenzin Dorjee).
+It covers the problem, data, cleaning, features, method, results (test evaluated once), feature importance,
+errors, discussion, limitations and future work. It shows `ASOS_04_pr_curves_val.png`, so keep that file
+in the same folder.
